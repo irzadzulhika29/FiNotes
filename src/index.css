@@ -1,0 +1,63 @@
+@import "tailwindcss";
+
+@theme {
+  --color-primary: #19e65e;
+  --color-primary-foreground: #112116;
+  --color-background-light: #f6f8f6;
+  --color-background-dark: #112116;
+  --color-paper-light: #ffffff;
+  --color-paper-dark: #1a2c20;
+  --color-border-light: #e0e0e0;
+  --color-border-dark: #2a3c30;
+  
+  --font-display: "Inter", sans-serif;
+}
+
+:root {
+  font-family: var(--font-display);
+  line-height: 1.5;
+  font-weight: 400;
+
+  color-scheme: light dark;
+  color: #37352F;
+  background-color: var(--color-background-light);
+
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    color: rgba(255, 255, 255, 0.87);
+    background-color: var(--color-background-dark);
+  }
+}
+
+body {
+  margin: 0;
+  min-width: 320px;
+  min-height: 100vh;
+}
+
+/* Notion-like scrollbar */
+::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+::-webkit-scrollbar-track {
+    background: transparent;
+}
+::-webkit-scrollbar-thumb {
+    background: #d1d5db;
+    border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+    background: #9ca3af;
+}
+@media (prefers-color-scheme: dark) {
+    ::-webkit-scrollbar-thumb {
+        background: #4b5563;
+    }
+}
