@@ -48,11 +48,21 @@ const MonthCard = ({
     <div className="glass-card overflow-hidden animate-fade-in hover-lift border border-[var(--glass-border)]/70">
       {/* Header */}
       <div
-        className="flex items-center justify-between p-5 sm:p-6 cursor-pointer select-none"
+        className="flex items-center justify-between p-5 sm:p-6 cursor-pointer select-none hover:bg-[var(--color-bg-elevated)]/30 transition-colors"
         onClick={() => setIsExpanded(!isExpanded)}
+        role="button"
+        aria-expanded={isExpanded}
+        aria-label={`${formatMonthYear(monthKey)}, ${transactions.length} transaksi`}
+        tabIndex={0}
+        onKeyDown={(e) => {
+          if (e.key === "Enter" || e.key === " ") {
+            e.preventDefault();
+            setIsExpanded(!isExpanded);
+          }
+        }}
       >
         <div className="flex items-center gap-3">
-          <div className="w-11 h-11 rounded-2xl gradient-primary flex items-center justify-center shadow-lg shadow-[var(--color-primary)]/25">
+          <div className="w-11 h-11 rounded-2xl gradient-primary flex items-center justify-center shadow-lg shadow-[var(--color-primary)]/25 transition-transform group-hover:scale-110">
             <span className="text-white font-bold text-sm tracking-wide">
               {monthKey.split("-")[1]}
             </span>
@@ -76,14 +86,17 @@ const MonthCard = ({
               onAddTransaction(monthKey);
             }}
             className="hover:bg-[var(--color-primary)]/10 hover:text-[var(--color-primary)]"
+            aria-label="Tambah transaksi baru"
           >
             <Plus className="w-5 h-5" />
           </Button>
-          {isExpanded ? (
-            <ChevronUp className="w-5 h-5 text-[var(--color-text-muted)]" />
-          ) : (
-            <ChevronDown className="w-5 h-5 text-[var(--color-text-muted)]" />
-          )}
+          <div className="transition-transform duration-200" style={{ transform: isExpanded ? 'rotate(0deg)' : 'rotate(0deg)' }}>
+            {isExpanded ? (
+              <ChevronUp className="w-5 h-5 text-[var(--color-text-muted)]" />
+            ) : (
+              <ChevronDown className="w-5 h-5 text-[var(--color-text-muted)]" />
+            )}
+          </div>
         </div>
       </div>
 
@@ -141,21 +154,28 @@ const MonthCard = ({
       {isExpanded && (
         <div className="p-4 sm:p-6 space-y-3">
           {transactions.length > 0 ? (
-            transactions.map((transaction) => (
-              <TransactionItem
+            transactions.map((transaction, index) => (
+              <div 
                 key={transaction.id}
-                transaction={transaction}
-                onEdit={onEditTransaction}
-                onDelete={onDeleteTransaction}
-              />
+                className="stagger-item"
+                style={{ animationDelay: `${index * 0.05}s` }}
+              >
+                <TransactionItem
+                  transaction={transaction}
+                  onEdit={onEditTransaction}
+                  onDelete={onDeleteTransaction}
+                />
+              </div>
             ))
           ) : (
-            <div className="text-center py-8 text-[var(--color-text-muted)]">
-              <p>Belum ada transaksi</p>
+            <div className="text-center py-8 text-[var(--color-text-muted)] animate-fade-in">
+              <div className="w-16 h-16 mx-auto mb-3 rounded-full bg-[var(--color-bg-elevated)] flex items-center justify-center">
+                <Plus className="w-8 h-8 text-[var(--color-text-muted)]" />
+              </div>
+              <p className="mb-3">Belum ada transaksi</p>
               <Button
                 variant="ghost"
                 size="sm"
-                className="mt-2"
                 onClick={() => onAddTransaction(monthKey)}
               >
                 <Plus className="w-4 h-4" />

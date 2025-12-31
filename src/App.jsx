@@ -3,33 +3,67 @@ import { Plus, Sparkles } from "lucide-react";
 import BalanceCard from "./components/BalanceCard";
 import MonthCard from "./components/MonthCard";
 import TransactionModal from "./components/TransactionModal";
+import ConnectionStatus from "./components/ConnectionStatus";
 import Button from "./components/ui/Button";
-
-// LocalStorage key
-const STORAGE_KEY = "finotes_transactions";
+import { useToast, ToastContainer } from "./components/ui/Toast";
+import {
+  getAllTransactions,
+  createTransaction,
+  updateTransaction,
+  deleteTransaction,
+  subscribeToTransactions,
+} from "./services/transactionService";
 
 function App() {
   const [transactions, setTransactions] = useState([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingTransaction, setEditingTransaction] = useState(null);
   const [selectedMonth, setSelectedMonth] = useState(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const { toasts, removeToast, showSuccess, showError, showInfo } = useToast();
 
-  // Load transactions from localStorage
+  // Load transactions from Supabase
   useEffect(() => {
-    const saved = localStorage.getItem(STORAGE_KEY);
-    if (saved) {
-      try {
-        setTransactions(JSON.parse(saved));
-      } catch (e) {
-        console.error("Failed to parse saved transactions:", e);
-      }
-    }
+    loadTransactions();
   }, []);
 
-  // Save transactions to localStorage
+  // Subscribe to realtime changes
   useEffect(() => {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(transactions));
-  }, [transactions]);
+    const unsubscribe = subscribeToTransactions((payload) => {
+      console.log("Realtime update:", payload);
+
+      if (payload.eventType === "INSERT") {
+        setTransactions((prev) => [payload.new, ...prev]);
+      } else if (payload.eventType === "UPDATE") {
+        setTransactions((prev) =>
+          prev.map((t) => (t.id === payload.new.id ? payload.new : t))
+        );
+      } else if (payload.eventType === "DELETE") {
+        setTransactions((prev) => prev.filter((t) => t.id !== payload.old.id));
+      }
+    });
+
+    return () => unsubscribe();
+  }, []);
+
+  // Load all transactions from database
+  const loadTransactions = async () => {
+    try {
+      setIsLoading(true);
+      const result = await getAllTransactions();
+
+      if (result.success) {
+        setTransactions(result.data);
+      } else {
+        showError(result.error || "Gagal memuat transaksi");
+      }
+    } catch (error) {
+      console.error("Error loading transactions:", error);
+      showError("Gagal memuat transaksi");
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   // Calculate total balance
   const totalBalance = useMemo(() => {
@@ -88,19 +122,52 @@ function App() {
     setIsModalOpen(true);
   };
 
-  const handleDeleteTransaction = (id) => {
-    setTransactions((prev) => prev.filter((t) => t.id !== id));
+  const handleDeleteTransaction = async (id) => {
+    try {
+      const result = await deleteTransaction(id);
+
+      if (result.success) {
+        // Update akan otomatis via realtime subscription
+        // Tapi kita update local state juga untuk immediate feedback
+        setTransactions((prev) => prev.filter((t) => t.id !== id));
+        showSuccess("Transaksi berhasil dihapus");
+      } else {
+        showError(result.error || "Gagal menghapus transaksi");
+      }
+    } catch (error) {
+      console.error("Error deleting transaction:", error);
+      showError("Gagal menghapus transaksi");
+    }
   };
 
-  const handleSaveTransaction = (transactionData) => {
-    if (editingTransaction) {
-      // Update existing
-      setTransactions((prev) =>
-        prev.map((t) => (t.id === transactionData.id ? transactionData : t))
-      );
-    } else {
-      // Add new
-      setTransactions((prev) => [...prev, transactionData]);
+  const handleSaveTransaction = async (transactionData) => {
+    try {
+      if (editingTransaction) {
+        // Update existing
+        const result = await updateTransaction(editingTransaction.id, transactionData);
+
+        if (result.success) {
+          setTransactions((prev) =>
+            prev.map((t) => (t.id === result.data.id ? result.data : t))
+          );
+          showSuccess("Transaksi berhasil diperbarui");
+        } else {
+          showError(result.error || "Gagal memperbarui transaksi");
+        }
+      } else {
+        // Add new
+        const result = await createTransaction(transactionData);
+
+        if (result.success) {
+          setTransactions((prev) => [result.data, ...prev]);
+          showSuccess("Transaksi berhasil ditambahkan");
+        } else {
+          showError(result.error || "Gagal menambahkan transaksi");
+        }
+      }
+    } catch (error) {
+      console.error("Error saving transaction:", error);
+      showError("Gagal menyimpan transaksi");
     }
   };
 
@@ -114,44 +181,75 @@ function App() {
   const currentMonthKey = new Date().toISOString().substring(0, 7);
 
   return (
-    <div className="min-h-screen pb-24">
+    <div className="min-h-screen max-w-md mx-auto pb-24 safe-bottom">
+      {/* Skip to main content link for accessibility */}
+      <a 
+        href="#main-content" 
+        className="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-[9999] focus:px-4 focus:py-2 focus:bg-[var(--color-primary)] focus:text-white focus:rounded-lg focus:shadow-xl"
+      >
+        Langsung ke konten utama
+      </a>
+
+      {/* Toast Notifications */}
+      <ToastContainer toasts={toasts} removeToast={removeToast} />
+
+      {/* Connection Status (only in development or on error) */}
+      <ConnectionStatus />
+
       {/* Header */}
-      <header className="sticky top-0 z-40 backdrop-blur-xl bg-[var(--color-bg-primary)]/80 border-b border-[var(--glass-border)]">
+      <header className="sticky top-0 z-[var(--z-index-sticky)] backdrop-blur-xl bg-[var(--color-bg-primary)]/80 border-b border-[var(--glass-border)] safe-top">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-10 py-4">
-          <div className="flex items-center gap-2">
-            <Sparkles className="w-6 h-6 text-[var(--color-primary)]" />
-            <h1 className="text-xl font-bold text-gradient">FiNotes</h1>
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <Sparkles className="w-6 h-6 text-[var(--color-primary)] animate-pulse-glow" />
+              <h1 className="text-xl font-bold text-gradient">FiNotes</h1>
+            </div>
+            <p className="lg:hidden text-sm text-[var(--color-text-muted)] mobile-hide">
+              Kelola keuangan Anda dengan mudah
+            </p>
           </div>
         </div>
       </header>
 
       {/* Main Content */}
-      <main className="max-w-6xl mx-auto w-full px-4 sm:px-6 lg:px-10 py-6 lg:py-10">
-        <div className="space-y-6 lg:grid lg:grid-cols-[320px_1fr] lg:gap-8 lg:space-y-0">
-          <div className="space-y-4 lg:sticky lg:top-24">
+      <main id="main-content" className="max-w-6xl mx-auto w-full px-4 sm:px-6 lg:px-10 py-6 lg:py-10" role="main">
+        <div className="space-y-6 lg:grid lg:grid-cols-1 lg:gap-8 lg:space-y-0">
+          <aside className="space-y-4" aria-label="Informasi Saldo">
             {/* Balance Card */}
             <BalanceCard totalBalance={totalBalance} />
-          </div>
+          </aside>
 
           {/* Month Cards */}
-          <div className="space-y-4">
-            {/* Current month first if not exists */}
-            {groupedTransactions.length === 0 ? (
-              <div className="glass-card p-8 sm:p-10 text-center">
-                <div className="w-16 h-16 mx-auto mb-4 rounded-2xl gradient-primary flex items-center justify-center shadow-lg shadow-[var(--color-primary)]/30">
+          <section className="space-y-4" aria-label="Daftar Transaksi Bulanan">
+            {/* Loading State */}
+            {isLoading ? (
+              <div className="glass-card p-8 sm:p-10 text-center animate-fade-in">
+                <div className="w-16 h-16 mx-auto mb-4 rounded-2xl gradient-primary flex items-center justify-center shadow-lg shadow-[var(--color-primary)]/30 animate-pulse">
+                  <Sparkles className="w-8 h-8 text-white" />
+                </div>
+                <h3 className="text-lg font-semibold text-[var(--color-text-primary)] mb-2">
+                  Memuat Data...
+                </h3>
+                <p className="text-[var(--color-text-muted)]">
+                  Mohon tunggu sebentar
+                </p>
+              </div>
+            ) : groupedTransactions.length === 0 ? (
+              <div className="glass-card p-8 sm:p-10 text-center animate-fade-in" role="article">
+                <div className="w-16 h-16 mx-auto mb-4 rounded-2xl gradient-primary flex items-center justify-center shadow-lg shadow-[var(--color-primary)]/30 animate-bounce">
                   <Plus className="w-8 h-8 text-white" />
                 </div>
                 <h3 className="text-lg font-semibold text-[var(--color-text-primary)] mb-2">
                   Mulai Catat Keuanganmu
                 </h3>
-                <p className="text-[var(--color-text-muted)] mb-5">
-                  Tambahkan pemasukan dan pengeluaran pertamamu
+                <p className="text-[var(--color-text-muted)] mb-5 max-w-sm mx-auto">
+                  Tambahkan pemasukan dan pengeluaran pertamamu untuk mulai mengelola keuangan dengan lebih baik
                 </p>
                 <Button
                   variant="primary"
                   onClick={() => handleAddTransaction(currentMonthKey)}
+                  leftIcon={<Plus className="w-4 h-4" />}
                 >
-                  <Plus className="w-4 h-4" />
                   Tambah Transaksi
                 </Button>
               </div>
@@ -171,20 +269,21 @@ function App() {
                 )
               )
             )}
-          </div>
+          </section>
         </div>
       </main>
 
       {/* Floating Action Button */}
       {groupedTransactions.length > 0 && (
-        <div className="fixed bottom-6 right-6 z-40">
+        <div className="fixed bottom-6 right-6 z-[var(--z-index-fixed)] safe-bottom safe-right">
           <Button
             variant="primary"
             size="lg"
             onClick={() => handleAddTransaction(currentMonthKey)}
-            className="rounded-full shadow-2xl shadow-[var(--color-primary)]/40 hover-scale"
+            className="rounded-full shadow-2xl shadow-[var(--color-primary)]/40 hover-scale hover-glow w-14 h-14 sm:w-16 sm:h-16"
+            aria-label="Tambah transaksi baru"
           >
-            <Plus className="w-6 h-6" />
+            <Plus className="w-6 h-6 sm:w-7 sm:h-7" />
           </Button>
         </div>
       )}
