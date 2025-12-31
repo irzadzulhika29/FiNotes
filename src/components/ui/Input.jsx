@@ -14,7 +14,7 @@ const Input = ({
   return (
     <div className="w-full">
       {label && (
-        <label className="block text-sm font-medium text-[var(--color-text-secondary)] mb-2">
+        <label className="block text-sm font-medium text-[var(--color-text-secondary)] mb-2.5">
           {label}
         </label>
       )}
@@ -30,15 +30,15 @@ const Input = ({
           onChange={onChange}
           placeholder={placeholder}
           className={`
-            w-full px-4 py-3 rounded-xl
-            bg-[var(--color-bg-elevated)]/50 
-            border border-[var(--glass-border)]
+            w-full px-4 py-4 rounded-2xl text-base
+            bg-[var(--color-bg-card)]/70 
+            border border-[var(--glass-border)]/70
             text-[var(--color-text-primary)] 
             placeholder-[var(--color-text-muted)]
             transition-all duration-200
             focus:outline-none focus:border-[var(--color-primary)]
             focus:bg-[var(--color-bg-elevated)]
-            focus:ring-2 focus:ring-[var(--color-primary)]/20
+            focus:ring-4 focus:ring-[var(--color-primary)]/30
             ${prefix ? "pl-12" : ""}
             ${
               error

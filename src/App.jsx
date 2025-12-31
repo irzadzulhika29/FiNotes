@@ -117,7 +117,7 @@ function App() {
     <div className="min-h-screen pb-24">
       {/* Header */}
       <header className="sticky top-0 z-40 backdrop-blur-xl bg-[var(--color-bg-primary)]/80 border-b border-[var(--glass-border)]">
-        <div className="max-w-3xl mx-auto px-4 py-4">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-10 py-4">
           <div className="flex items-center gap-2">
             <Sparkles className="w-6 h-6 text-[var(--color-primary)]" />
             <h1 className="text-xl font-bold text-gradient">FiNotes</h1>
@@ -126,48 +126,52 @@ function App() {
       </header>
 
       {/* Main Content */}
-      <main className="max-w-3xl mx-auto px-4 py-6 space-y-6">
-        {/* Balance Card */}
-        <BalanceCard totalBalance={totalBalance} />
+      <main className="max-w-6xl mx-auto w-full px-4 sm:px-6 lg:px-10 py-6 lg:py-10">
+        <div className="space-y-6 lg:grid lg:grid-cols-[320px_1fr] lg:gap-8 lg:space-y-0">
+          <div className="space-y-4 lg:sticky lg:top-24">
+            {/* Balance Card */}
+            <BalanceCard totalBalance={totalBalance} />
+          </div>
 
-        {/* Month Cards */}
-        <div className="space-y-4">
-          {/* Current month first if not exists */}
-          {groupedTransactions.length === 0 ? (
-            <div className="glass-card p-8 text-center">
-              <div className="w-16 h-16 mx-auto mb-4 rounded-2xl gradient-primary flex items-center justify-center">
-                <Plus className="w-8 h-8 text-white" />
+          {/* Month Cards */}
+          <div className="space-y-4">
+            {/* Current month first if not exists */}
+            {groupedTransactions.length === 0 ? (
+              <div className="glass-card p-8 sm:p-10 text-center">
+                <div className="w-16 h-16 mx-auto mb-4 rounded-2xl gradient-primary flex items-center justify-center shadow-lg shadow-[var(--color-primary)]/30">
+                  <Plus className="w-8 h-8 text-white" />
+                </div>
+                <h3 className="text-lg font-semibold text-[var(--color-text-primary)] mb-2">
+                  Mulai Catat Keuanganmu
+                </h3>
+                <p className="text-[var(--color-text-muted)] mb-5">
+                  Tambahkan pemasukan dan pengeluaran pertamamu
+                </p>
+                <Button
+                  variant="primary"
+                  onClick={() => handleAddTransaction(currentMonthKey)}
+                >
+                  <Plus className="w-4 h-4" />
+                  Tambah Transaksi
+                </Button>
               </div>
-              <h3 className="text-lg font-semibold text-[var(--color-text-primary)] mb-2">
-                Mulai Catat Keuanganmu
-              </h3>
-              <p className="text-[var(--color-text-muted)] mb-4">
-                Tambahkan pemasukan dan pengeluaran pertamamu
-              </p>
-              <Button
-                variant="primary"
-                onClick={() => handleAddTransaction(currentMonthKey)}
-              >
-                <Plus className="w-4 h-4" />
-                Tambah Transaksi
-              </Button>
-            </div>
-          ) : (
-            groupedTransactions.map(
-              ({ monthKey, transactions, totalIncome, totalExpense }) => (
-                <MonthCard
-                  key={monthKey}
-                  monthKey={monthKey}
-                  transactions={transactions}
-                  totalIncome={totalIncome}
-                  totalExpense={totalExpense}
-                  onAddTransaction={handleAddTransaction}
-                  onEditTransaction={handleEditTransaction}
-                  onDeleteTransaction={handleDeleteTransaction}
-                />
+            ) : (
+              groupedTransactions.map(
+                ({ monthKey, transactions, totalIncome, totalExpense }) => (
+                  <MonthCard
+                    key={monthKey}
+                    monthKey={monthKey}
+                    transactions={transactions}
+                    totalIncome={totalIncome}
+                    totalExpense={totalExpense}
+                    onAddTransaction={handleAddTransaction}
+                    onEditTransaction={handleEditTransaction}
+                    onDeleteTransaction={handleDeleteTransaction}
+                  />
+                )
               )
-            )
-          )}
+            )}
+          </div>
         </div>
       </main>
 

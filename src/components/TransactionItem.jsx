@@ -51,11 +51,11 @@ const TransactionItem = ({ transaction, onEdit, onDelete }) => {
   };
 
   return (
-    <div className="group flex items-center gap-4 p-4 rounded-xl bg-[var(--color-bg-elevated)]/50 hover:bg-[var(--color-bg-elevated)] transition-all duration-200 animate-fade-in">
+    <div className="group flex items-center gap-4 p-4 rounded-2xl border border-[var(--glass-border)]/70 bg-[var(--color-bg-card)]/60 hover:bg-[var(--color-bg-elevated)] transition-all duration-200 animate-fade-in">
       {/* Icon */}
       <div
         className={`
-        p-3 rounded-xl
+        p-3 rounded-2xl
         ${
           isIncome
             ? "bg-[var(--color-income)]/15 text-[var(--color-income-light)]"
@@ -94,14 +94,14 @@ const TransactionItem = ({ transaction, onEdit, onDelete }) => {
       <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
         <button
           onClick={() => onEdit(transaction)}
-          className="p-2 hover:bg-[var(--color-bg-card)] rounded-lg transition-colors text-[var(--color-text-muted)] hover:text-[var(--color-primary)]"
+          className="p-2 hover:bg-[var(--color-bg-card)] rounded-xl transition-colors text-[var(--color-text-muted)] hover:text-[var(--color-primary)]"
           aria-label="Edit transaction"
         >
           <Pencil className="w-4 h-4" />
         </button>
         <button
           onClick={() => onDelete(id)}
-          className="p-2 hover:bg-[var(--color-bg-card)] rounded-lg transition-colors text-[var(--color-text-muted)] hover:text-[var(--color-expense)]"
+          className="p-2 hover:bg-[var(--color-bg-card)] rounded-xl transition-colors text-[var(--color-text-muted)] hover:text-[var(--color-expense)]"
           aria-label="Delete transaction"
         >
           <Trash2 className="w-4 h-4" />
