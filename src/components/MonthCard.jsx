@@ -45,20 +45,20 @@ const MonthCard = ({
       : 50;
 
   return (
-    <div className="glass-card overflow-hidden animate-fade-in hover-lift">
+    <div className="glass-card overflow-hidden animate-fade-in hover-lift border border-[var(--glass-border)]/70">
       {/* Header */}
       <div
-        className="flex items-center justify-between p-5 cursor-pointer select-none"
+        className="flex items-center justify-between p-5 sm:p-6 cursor-pointer select-none"
         onClick={() => setIsExpanded(!isExpanded)}
       >
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl gradient-primary flex items-center justify-center">
-            <span className="text-white font-bold text-sm">
+          <div className="w-11 h-11 rounded-2xl gradient-primary flex items-center justify-center shadow-lg shadow-[var(--color-primary)]/25">
+            <span className="text-white font-bold text-sm tracking-wide">
               {monthKey.split("-")[1]}
             </span>
           </div>
           <div>
-            <h3 className="font-semibold text-[var(--color-text-primary)]">
+            <h3 className="font-semibold text-[var(--color-text-primary)] text-base">
               {formatMonthYear(monthKey)}
             </h3>
             <p className="text-sm text-[var(--color-text-muted)]">
@@ -88,9 +88,9 @@ const MonthCard = ({
       </div>
 
       {/* Summary */}
-      <div className="px-5 pb-4 border-b border-[var(--glass-border)]">
+      <div className="px-5 sm:px-6 pb-4 border-b border-[var(--glass-border)]/70">
         {/* Income & Expense */}
-        <div className="flex items-center justify-between mb-3">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between mb-3">
           <div className="flex items-center gap-2">
             <TrendingUp className="w-4 h-4 text-[var(--color-income-light)]" />
             <span className="text-sm text-[var(--color-text-secondary)]">
@@ -112,7 +112,7 @@ const MonthCard = ({
         </div>
 
         {/* Progress Bar */}
-        <div className="h-2 rounded-full bg-[var(--color-bg-elevated)] overflow-hidden">
+        <div className="h-2.5 rounded-full bg-[var(--color-bg-elevated)] overflow-hidden">
           <div
             className="h-full gradient-income transition-all duration-500 ease-out rounded-full"
             style={{ width: `${incomePercentage}%` }}
@@ -139,7 +139,7 @@ const MonthCard = ({
 
       {/* Transactions List */}
       {isExpanded && (
-        <div className="p-4 space-y-2">
+        <div className="p-4 sm:p-6 space-y-3">
           {transactions.length > 0 ? (
             transactions.map((transaction) => (
               <TransactionItem

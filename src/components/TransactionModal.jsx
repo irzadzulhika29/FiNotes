@@ -101,7 +101,7 @@ const TransactionModal = ({
       />
 
       {/* Modal */}
-      <div className="relative w-full sm:max-w-md bg-[var(--color-bg-secondary)] rounded-t-3xl sm:rounded-2xl p-6 animate-slide-up">
+      <div className="relative w-full sm:max-w-xl bg-[var(--color-bg-secondary)] rounded-t-3xl sm:rounded-3xl p-6 sm:p-7 animate-slide-up shadow-2xl shadow-black/40 border border-[var(--glass-border)]/80">
         {/* Header */}
         <div className="flex items-center justify-between mb-6">
           <h2 className="text-xl font-bold text-[var(--color-text-primary)]">
@@ -152,6 +152,7 @@ const TransactionModal = ({
               setFormData((prev) => ({ ...prev, amount: e.target.value }))
             }
             placeholder="0"
+            className="text-2xl font-semibold tracking-tight"
             required
           />
 

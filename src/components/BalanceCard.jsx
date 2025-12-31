@@ -14,7 +14,7 @@ const BalanceCard = ({ totalBalance }) => {
   };
 
   return (
-    <div className="relative overflow-hidden rounded-2xl gradient-primary p-6 animate-pulse-glow">
+    <div className="relative overflow-hidden rounded-3xl gradient-primary p-6 sm:p-7 shadow-2xl shadow-black/40">
       {/* Background decoration */}
       <div className="absolute top-0 right-0 w-64 h-64 bg-white/5 rounded-full -translate-y-1/2 translate-x-1/2" />
       <div className="absolute bottom-0 left-0 w-48 h-48 bg-white/5 rounded-full translate-y-1/2 -translate-x-1/2" />
@@ -23,14 +23,14 @@ const BalanceCard = ({ totalBalance }) => {
         {/* Header */}
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-3">
-            <div className="p-2.5 bg-white/20 rounded-xl backdrop-blur-sm">
+            <div className="p-2.5 bg-white/15 rounded-2xl backdrop-blur-sm">
               <Wallet className="w-5 h-5 text-white" />
             </div>
             <span className="text-white/90 font-medium">Total Saldo</span>
           </div>
           <button
             onClick={() => setIsHidden(!isHidden)}
-            className="p-2 hover:bg-white/10 rounded-lg transition-colors"
+            className="p-2 hover:bg-white/10 rounded-xl transition-colors"
             aria-label={isHidden ? "Show balance" : "Hide balance"}
           >
             {isHidden ? (
